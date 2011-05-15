@@ -5,7 +5,7 @@
 # way you like, don't complain if it breaks. Or do, and suggest
 # improvements.
 
-import ConfigParser, subprocess, notmuch, os, tempfile, base64, datetime, re, shutil, mimetypes, string
+import ConfigParser, subprocess, notmuch, os, tempfile, datetime, shutil, mimetypes, string
 from email.parser import Parser
 
 def find_url_in_mail(mail):
