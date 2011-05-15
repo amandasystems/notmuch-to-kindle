@@ -1,6 +1,8 @@
-* What is?
+* What is notmuch-to-kindle?
 
 notmuch-to-kindle is small tool to transfer notmuch emails to Kindle in mobi format, using calibre's utility programs (most importantly ebook-convert).
+
+It currently extracts all mime parts, post-processes some (at this time, only .html, future versions will support epub and .doc), and copies all acceptable files (.mobi, .azw, .pdf) to your chosen Kindle search path.
 
 * Requirements
 - Calibre's command-line tools (ebook-convert).
@@ -19,5 +21,6 @@ On invocation the program will look for the ~/.notmuch-to-kindlerc file, which s
 These are all the options available. Target specifies the directory to copy the finished .mobi files to, max is how many files to copy (max), and tag is the tag used to mark the emails to export from notmuch.
 
 * What doesn't work yet?
-- Attachments. The program should prioritize attached ebook files or PDFs -- but it doesn't. As a matter of fact, it just ignores them straight away.
 - Automatic mounting of the device. I wanted to use Calibre's ebook-device, but for reasons that escape me, I can't get ebook-device cp to eat my newly-produced ebook files. Suggestions/patches are welcome of course.
+- Unicoded attachments (at least with my Python, it may be a bug in the email parser).
+- Text-only email. Currently only html mime parts and attachments are used.

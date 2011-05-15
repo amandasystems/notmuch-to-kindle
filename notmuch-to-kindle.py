@@ -27,7 +27,7 @@ mails = nm_query.search_messages()
 maillist = []
 
 max_entries = config.getint("main", "max")
-types_to_convert = ['text/html']
+types_to_convert = ['text/html'] # TODO add .epub etc.
 iterator = 0
 for m in mails:
     if iterator < max_entries:
@@ -40,41 +40,12 @@ def sanitize_filename(fn):
     valid_chars = frozenset("-_.() %s%s" % (string.ascii_letters, string.digits))
     return ''.join(c for c in fn if c in valid_chars)
 
-
-# def get_html_multipart(mail):
-#     "Return the text/html part of a multipart mail, or simply the first part if not multipart"
-            
-#     if not mail.is_multipart():
-#         return mail.get_payload(decode=True)
-#     else:
-#         for part in mail.walk():
-# #            if part.get_content_maintype() == 'application':
-#  #               print part.get_content_type()
-
-#             # iterate over entire mail. if there's a text/html and a text/plain, prefer html.
-#             # if there's an application/pdf, extract it.
-#             # ext = mimetypes.guess_extension(part.get_content_type()) (see http://docs.python.org/library/email-examples.html)
-
-#             # don't bother with multipart, they're just containers
-#             if part.get_content_maintype() == 'multipart':
-#                 continue
-#             else:
-#                 print part.get_content_type()
-
-#         payloads = mail.get_payload()
-#         for load in payloads:
-#             if load.get_content_type() == "text/html":
-#                 return load.get_payload(decode=True)
-#             elif load.is_multipart():
-#                 return get_html_multipart(load)
-#         # if we got here we're screwed
-
-
 tempfolder = tempfile.mkdtemp()
 
 def gen_item (mail):
     with open(mail.get_filename(), 'r') as fp:
         mailfile = Parser().parse(fp)
+        fp.close()
     url = find_url_in_mail(mailfile)    
     counter = 1
 
@@ -99,6 +70,7 @@ def gen_item (mail):
             fp.close()
         if part.get_content_type() in types_to_convert:
             # html files needs conversion.
+            # TODO if part is .doc -- preprocess with antiword
             p = subprocess.Popen(
                 ['ebook-convert',
                  os.path.join(tempfolder, filename), 
@@ -114,9 +86,11 @@ def gen_item (mail):
 
 map(gen_item, maillist)
 
-for f in filter(lambda x: (x.endswith(".mobi") or x.endswith(".pdf")), os.listdir(tempfolder)):
-    path = "%s/%s" % (tempfolder, f)
-    print "now copying " + path + " to " + config.get("main", "target")
-    shutil.copy(path, config.get("main", "target"))
-
-shutil.rmtree(tempfolder)
+try:
+    for f in filter(lambda x: (os.path.splitext(x)[1] in [".pdf", ".mobi", ".azw"]), os.listdir(tempfolder)):
+        path = "%s/%s" % (tempfolder, f)
+        print "now copying " + path + " to " + config.get("main", "target")
+        shutil.copy(path, config.get("main", "target"))
+finally:
+    print "removed temporary files"
+    shutil.rmtree(tempfolder)
