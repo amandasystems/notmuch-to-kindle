@@ -2,7 +2,9 @@
 
 notmuch-to-kindle is small tool to transfer notmuch emails to Kindle in mobi format, using calibre's utility programs (most importantly ebook-convert).
 
-It currently extracts all mime parts, post-processes some (at this time, only .html, future versions will support epub and .doc), and copies all acceptable files (.mobi, .azw, .pdf) to your chosen Kindle search path.
+It currently extracts all mime parts, post-processes some (at this time, only .html and .doc, future versions will support epub as well), and copies all acceptable files (.mobi, .azw, .pdf) to your chosen Kindle search path.
+
+.doc is converted via html through abiword. If it is missing, notmuch-to-kindle will output an error to stderr and proceed, ignoring the attached file.
 
 * Requirements
 - Calibre's command-line tools (ebook-convert).
@@ -22,5 +24,6 @@ These are all the options available. Target specifies the directory to copy the 
 
 * What doesn't work yet?
 - Automatic mounting of the device. I wanted to use Calibre's ebook-device, but for reasons that escape me, I can't get ebook-device cp to eat my newly-produced ebook files. Suggestions/patches are welcome of course.
-- Unicoded attachments (at least with my Python, it may be a bug in the email parser).
 - Text-only email. Currently only html mime parts and attachments are used.
+- All attachments. Some attachments with unicoded file names won't be extracted.
+- Metadata for .doc files. All metadata in the created .mobi files will currently be empty for .doc.
