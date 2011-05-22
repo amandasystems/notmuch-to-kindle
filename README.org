@@ -26,4 +26,3 @@ These are all the options available. Target specifies the directory to copy the 
 - Automatic mounting of the device. I wanted to use Calibre's ebook-device, but for reasons that escape me, I can't get ebook-device cp to eat my newly-produced ebook files. Suggestions/patches are welcome of course.
 - Text-only email. Currently only html mime parts and attachments are used.
 - All attachments. Some attachments with unicoded file names won't be extracted.
-- Metadata for .doc files. All metadata in the created .mobi files will currently be empty for .doc.

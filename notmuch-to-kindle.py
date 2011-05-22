@@ -40,16 +40,21 @@ def sanitize_filename(fn):
     valid_chars = frozenset("-_.() %s%s" % (string.ascii_letters, string.digits))
     return ''.join(c for c in fn if c in valid_chars)
 
-def calibre_to_mobi(path, filename, authors, date, title, url):
+def calibre_to_mobi(path, filename, authors=None, date=None, title=None, url=None):
+    meta_args = []
+    if not authors == None:
+        meta_args.append('--authors=%s' % authors)
+    if not date == None:
+        meta_args.append('--pubdate=%d' % date)
+    if not title == None:
+        meta_args.append('--title=%s' % title)
+    if not url == None:
+        meta_args.append('--comments=%s' % url)
+    
     p = subprocess.Popen(
         ['ebook-convert',
          os.path.join(path, filename), 
-         os.path.join(path, os.path.splitext(filename)[0] + ".mobi"),
-         '--input-profile=%s' % config.get("ebook-convert", "input_profile"),
-         '--authors="%s"'  % authors, 
-         '--pubdate="%d"'  % date, 
-         '--title="%s"'    % title, 
-         '--comments="%s"' % url], 
+         os.path.join(path, os.path.splitext(filename)[0] + ".mobi")] + meta_args, 
         stdout=subprocess.PIPE, stderr = subprocess.PIPE)
     stdout, stderr = p.communicate()
     
@@ -101,8 +106,7 @@ def gen_item (mail):
                 stdout, stderr = p.communicate()
             except OSError, e:
                 print >>sys.stderr, "Failed to convert to html using abiword. Possibly missing abiword? Got error: ", e
-            # TODO implement optional arguments in calibre_to_mobi
-            calibre_to_mobi(tempfolder, basename + '.html', "", 0, "", "")
+            calibre_to_mobi(tempfolder, basename + '.html')
         if part.get_content_type() in types_to_convert:
             # html files needs conversion.
             calibre_to_mobi(tempfolder, filename, mail.get_header("From"), 
