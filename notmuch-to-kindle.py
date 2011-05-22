@@ -71,7 +71,10 @@ def gen_item (mail):
         # email message can't be used to overwrite important files
         filename = part.get_filename()
         if not filename:
-            ext = mimetypes.guess_extension(part.get_content_type())
+            if part.get_content_type() == 'text/plain':
+                ext = '.txt'
+            else: 
+                ext = mimetypes.guess_extension(part.get_content_type())
             if not ext:
                 # Use a generic bag-of-bits extension
                 ext = '.bin'
@@ -108,7 +111,7 @@ def gen_item (mail):
 map(gen_item, maillist)
 
 try:
-    for f in filter(lambda x: (os.path.splitext(x)[1] in [".pdf", ".mobi", ".azw"]), os.listdir(tempfolder)):
+    for f in filter(lambda x: (os.path.splitext(x)[1] in [".pdf", ".mobi", ".azw", ".txt"]), os.listdir(tempfolder)):
         path = "%s/%s" % (tempfolder, f)
 #        print "now copying " + path + " to " + config.get("main", "target")
         shutil.copy(path, config.get("main", "target"))
