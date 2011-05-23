@@ -5,7 +5,7 @@
 # way you like, don't complain if it breaks. Or do, and suggest
 # improvements.
 
-import ConfigParser, subprocess, notmuch, os, tempfile, datetime, shutil, mimetypes, string, sys
+import ConfigParser, subprocess, notmuch, os, tempfile, datetime, shutil, mimetypes, string, sys, email
 from email.parser import Parser
 
 def find_url_in_mail(mail):
@@ -58,9 +58,6 @@ def calibre_to_mobi(path, filename, authors=None, date=None, title=None, url=Non
         stdout=subprocess.PIPE, stderr = subprocess.PIPE)
     stdout, stderr = p.communicate()
     
-
-tempfolder = tempfile.mkdtemp()
-
 def gen_item (mail):
     with open(mail.get_filename(), 'r') as fp:
         mailfile = Parser().parse(fp)
@@ -88,6 +85,11 @@ def gen_item (mail):
                 # Use a generic bag-of-bits extension
                 ext = '.bin'
             filename = '%s-part-%03d%s' % (mail.get_header("Subject"), counter, ext)
+        if os.path.splitext(filename)[1] == '':
+            # didn't get a proper file name. Try decoding it.
+            #filename = email.utils.decode_rfc2231(filename)
+            # doesn't work. Don't know why.
+            print >> sys.stderr, "Part has invalid file name \"%s\"" % filename
         filename = sanitize_filename(filename)
         counter += 1
         with open(os.path.join(tempfolder, filename), 'wb') as fp:
@@ -115,14 +117,14 @@ def gen_item (mail):
             # html files needs conversion.
             calibre_to_mobi(tempfolder, filename, mail.get_header("From"), 
                             mail.get_date(), mail.get_header("Subject"), url)
-
-map(gen_item, maillist)
-
 try:
+    tempfolder = tempfile.mkdtemp()
+    map(gen_item, maillist)
+
     for f in filter(lambda x: (os.path.splitext(x)[1] in [".pdf", ".mobi", ".azw", ".txt"]), os.listdir(tempfolder)):
         path = "%s/%s" % (tempfolder, f)
-#        print "now copying " + path + " to " + config.get("main", "target")
         shutil.copy(path, config.get("main", "target"))
 finally:
- #   print "removed temporary files"
     shutil.rmtree(tempfolder)
+
+    
