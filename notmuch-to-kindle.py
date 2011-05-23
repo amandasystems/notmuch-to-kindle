@@ -67,13 +67,17 @@ def gen_item (mail):
         fp.close()
     url = find_url_in_mail(mailfile)    
     counter = 1
+    
+    types = [part.get_content_type() for part in mailfile.walk()]
 
     for part in mailfile.walk():
         # multipart/* are just containers
         if part.get_content_maintype() == 'multipart':
             continue
-        # Applications should really sanitize the given filename so that an
-        # email message can't be used to overwrite important files
+        if part.get_content_type() == 'text/plain' and 'text/html' in types:
+            print >> sys.stderr, "Warning: skipping text/plain part, since text/html part was found for mail %s." % mail.get_filename()
+            continue
+        
         filename = part.get_filename()
         if not filename:
             if part.get_content_type() == 'text/plain':
