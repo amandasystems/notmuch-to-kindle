@@ -9,21 +9,19 @@ It currently extracts all mime parts, post-processes some (at this time, only .h
 If an email has both a text/plain and a text/html part, the HTML part will be extracted and exported to .mobi. If it only has a text/plain part, it will be extracted and copied without further conversion.
 
 * Requirements
-- Calibre's command-line tools (ebook-convert).
-- Python notmuch bindings.
-  
+- Calibre's command-line tools (ebook-convert, ebook-device).
+- Python notmuch bindings.  
 * Usage
 On invocation the program will look for the ~/.notmuch-to-kindlerc file, which should contain something like this:
 
 : [main]
 : tag=read/review
 : max=15
-: target=/media/Kindle/documents/mail
+: target=prs500:/documents/mail
 : [ebook-convert]
 : input_profile=kindle
 
-These are all the options available. Target specifies the directory to copy the finished .mobi files to, max is how many files to copy (max), and tag is the tag used to mark the emails to export from notmuch.
+These are all the options available. Target specifies the ebook-device target to copy the finished files to, max is how many files to copy (max), and tag is the tag used to mark the emails to export from notmuch.
 
 * What doesn't work yet?
-- Automatic mounting of the device. I wanted to use Calibre's ebook-device, but for reasons that escape me, I can't get ebook-device cp to eat my newly-produced ebook files. Suggestions/patches are welcome of course.
-- Some attachments with unicoded file names won't be extracted, because of a failure having to do with RFC2231. Email.utils.decode_rfc2231 won't work, for some reason.
+- Some attachments with unicoded file names won't be extracted, because of a failure having to do with RFC2231. Email.utils.decode_rfc2231 won't work, for some reason. I believe this to be a bug in Python. Suggestions welcome.

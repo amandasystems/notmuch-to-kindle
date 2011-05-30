@@ -72,7 +72,7 @@ def gen_item (mail):
         if part.get_content_maintype() == 'multipart':
             continue
         if part.get_content_type() == 'text/plain' and 'text/html' in types:
-            print >> sys.stderr, "Warning: skipping text/plain part, since text/html part was found for mail %s." % mail.get_filename()
+            print "Warning: skipping text/plain part, since text/html part was found for mail %s." % mail.get_filename()
             continue
         
         filename = part.get_filename()
@@ -89,7 +89,7 @@ def gen_item (mail):
             # didn't get a proper file name. Try decoding it.
             #filename = email.utils.decode_rfc2231(filename)
             # doesn't work. Don't know why.
-            print >> sys.stderr, "Part has invalid file name \"%s\"" % filename
+            print >> sys.stderr, "Error: ignoring part with invalid file name \"%s\"." % filename
         filename = sanitize_filename(filename)
         counter += 1
         with open(os.path.join(tempfolder, filename), 'wb') as fp:
@@ -122,8 +122,16 @@ try:
     map(gen_item, maillist)
 
     for f in filter(lambda x: (os.path.splitext(x)[1] in [".pdf", ".mobi", ".azw", ".txt"]), os.listdir(tempfolder)):
-        path = "%s/%s" % (tempfolder, f)
-        shutil.copy(path, config.get("main", "target"))
+        #path = "%s/%s" % (tempfolder, f)
+        #shutil.copy(path, config.get("main", "target"))
+        p = subprocess.Popen(['ebook-device', "cp", f, config.get("main", "target")],
+                             stdout=subprocess.PIPE, stderr = subprocess.PIPE,
+                             cwd=tempfolder)
+        stdout, stderr = p.communicate()
+        if stdout:
+            print "ebook-device: ", stdout
+        if stderr:            
+            print "ebook-device: ", stderr
 finally:
     shutil.rmtree(tempfolder)
 
